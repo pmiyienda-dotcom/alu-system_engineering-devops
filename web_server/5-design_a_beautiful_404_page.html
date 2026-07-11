@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Connection Refused</title>
+<style>
+  :root {
+    --bg: #0c0e12;
+    --panel: #14171d;
+    --border: #2a2f3a;
+    --text: #d7dae0;
+    --dim: #5c6472;
+    --green: #6ee7a8;
+    --amber: #f2b866;
+    --red: #f0665e;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    background: radial-gradient(ellipse at top, #171a21 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .terminal {
+    width: 100%;
+    max-width: 640px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02);
+    overflow: hidden;
+    animation: rise 0.5s ease-out;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .titlebar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    background: #1b1f27;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+  .titlebar span {
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--dim);
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+  }
+
+  .body {
+    padding: 1.5rem 1.5rem 2rem;
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  .prompt { color: var(--green); }
+  .path { color: var(--amber); }
+  .cmd { color: var(--text); }
+  .out-err { color: var(--red); }
+  .comment { color: var(--dim); }
+
+  .line { white-space: pre-wrap; word-break: break-word; }
+
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.05em;
+    background: var(--green);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .quote {
+    margin-top: 1.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px dashed var(--border);
+    color: var(--dim);
+    font-style: italic;
+    font-size: 0.85rem;
+  }
+
+  .home {
+    display: inline-block;
+    margin-top: 1.6rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--green);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .home:hover, .home:focus-visible {
+    border-color: var(--green);
+    color: #eafff2;
+    outline: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; opacity: 1; }
+    .terminal { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <main class="terminal" role="main" aria-label="404 page not found">
+    <div class="titlebar">
+      <span class="dot r"></span>
+      <span class="dot y"></span>
+      <span class="dot g"></span>
+      <span>ubuntu@web-01: ~</span>
+    </div>
+    <div class="body">
+      <div class="line"><span class="prompt">ubuntu@web-01</span>:<span class="path">~</span>$ <span class="cmd">curl -I https://this-page.tech/</span></div>
+      <div class="line out-err">HTTP/1.1 404 Not Found</div>
+      <div class="line comment"># the page you asked for isn't on this host</div>
+      <br>
+      <div class="line"><span class="prompt">ubuntu@web-01</span>:<span class="path">~</span>$ <span class="cmd">cat /var/www/html/404.html</span></div>
+      <div class="line">Ceci n'est pas une page</div>
+      <br>
+      <div class="line"><span class="prompt">ubuntu@web-01</span>:<span class="path">~</span>$ <span class="cursor"></span></div>
+
+      <p class="quote">This is not a pipe, and this is not a page. — with apologies to Magritte</p>
+
+      <a class="home" href="/">cd ~ &amp; go home</a>
+    </div>
+  </main>
+</body>
+</html>
