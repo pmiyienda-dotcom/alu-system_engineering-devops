@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 # Start Apache, which was not running, causing connection resets
 service apache2 start
+service apache2 status
