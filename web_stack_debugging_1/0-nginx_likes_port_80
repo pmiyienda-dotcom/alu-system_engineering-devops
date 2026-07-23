@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Install and start nginx, which was not installed at all
-apt-get update
+# Ensure nginx is installed, the default site is properly enabled, and nginx is running
+apt-get update -y
 apt-get install -y nginx
-service nginx start
+rm -f /etc/nginx/sites-enabled/default
+ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+service nginx restart
