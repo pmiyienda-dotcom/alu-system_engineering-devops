@@ -5,7 +5,7 @@
 apt-get update -y
 apt-get install -y nginx
 
-useradd -r nginx
+id -u nginx &>/dev/null || useradd -r nginx
 
 sed -i 's/^user www-data;/user nginx;/' /etc/nginx/nginx.conf
 sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
@@ -18,4 +18,11 @@ chown -R nginx:nginx /var/lib/nginx
 sed -i 's|pid /run/nginx.pid;|pid /var/lib/nginx/nginx.pid;|' /etc/nginx/nginx.conf
 
 service nginx stop 2>/dev/null
-su -s /bin/bash -c "nginx" nginx
+pkill nginx 2>/dev/null
+sleep 1
+
+su -s /bin/bash nginx -c "/usr/sbin/nginx"
+
+sleep 1
+# shellcheck disable=SC2009
+ps auxff | grep nginx
