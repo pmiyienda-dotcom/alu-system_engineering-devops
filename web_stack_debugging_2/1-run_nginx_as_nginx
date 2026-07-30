@@ -1,39 +1,39 @@
 #!/usr/bin/env bash
-# Configures Nginx to run completely as the nginx user on port 8080
+# Configures Nginx to run entirely as the nginx user on port 8080
 
-# Update and install nginx
-apt-get update -y
-apt-get install -y nginx
+# 1. Update and install nginx with sudo to ensure it passes if executed via unprivileged hooks
+sudo apt-get update -y
+sudo apt-get install -y nginx
 
-# Ensure the nginx user exists
-id -u nginx > /dev/null 2>&1 || useradd -r nginx
+# 2. Ensure the nginx user exists
+id -u nginx > /dev/null 2>&1 || sudo useradd -r nginx
 
-# 1. Comment out the 'user' directive to stop the warning when running as non-root
-sed -i 's/^user /#user /' /etc/nginx/nginx.conf
+# 3. Comment out the 'user' directive to stop warnings/aborts when running as non-root
+sudo sed -i 's/^user /#user /' /etc/nginx/nginx.conf
 
-# 2. Delete duplicate worker_rlimit_nofile lines causing crashes
-sed -i '/worker_rlimit_nofile/d' /etc/nginx/nginx.conf
+# 4. Remove duplicate configuration blocks causing startup errors
+sudo sed -i '/worker_rlimit_nofile/d' /etc/nginx/nginx.conf
 
-# 3. Move PID file location to a path the nginx user can write to
-sed -i 's|pid /run/nginx.pid;|pid /var/run/nginx/nginx.pid;|' /etc/nginx/nginx.conf
+# 5. Move the PID configuration location to a path nginx has permissions to write to
+sudo sed -i 's|pid /run/nginx.pid;|pid /var/run/nginx/nginx.pid;|' /etc/nginx/nginx.conf
 
-# 4. Change default listening ports to 8080
+# 6. Change all listening instances across default setups to 8080
 if [ -f /etc/nginx/sites-available/default ]; then
-    sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
-    sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:8080 default_server;/' /etc/nginx/sites-available/default
+    sudo sed -i 's/listen 80 /listen 8080 /g' /etc/nginx/sites-available/default
+    sudo sed -i 's/listen \[::\]:80 /listen \[::\]:8080 /g' /etc/nginx/sites-available/default
 fi
 
-# Fix system directory ownerships so the unprivileged user has full access
-mkdir -p /var/lib/nginx /var/log/nginx /var/run/nginx
-chown -R nginx:nginx /var/lib/nginx
-chown -R nginx:nginx /var/log/nginx
-chown -R nginx:nginx /var/run/nginx
+# 7. Establish and grant ownership over standard directories
+sudo mkdir -p /var/lib/nginx /var/log/nginx /var/run/nginx
+sudo chown -R nginx:nginx /var/lib/nginx
+sudo chown -R nginx:nginx /var/log/nginx
+sudo chown -R nginx:nginx /var/run/nginx
 
-# Stop any running system service instances cleanly
-service nginx stop > /dev/null 2>&1
-pkill nginx > /dev/null 2>&1
+# 8. Cleanly stop old root service threads
+sudo service nginx stop > /dev/null 2>&1
+sudo pkill nginx > /dev/null 2>&1
 sleep 1
 
-# Start Nginx cleanly directly as the nginx user
-su -s /bin/bash nginx -c "/usr/sbin/nginx"
+# 9. Execute Nginx safely directly as the unprivileged user
+sudo su -s /bin/bash nginx -c "/usr/sbin/nginx"
 
