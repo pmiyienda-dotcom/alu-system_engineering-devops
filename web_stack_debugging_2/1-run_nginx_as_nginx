@@ -1,28 +1,39 @@
 #!/usr/bin/env bash
-# Install nginx, create the nginx user, and configure nginx to run
-# entirely as that user, listening on port 8080
+# Configures Nginx to run completely as the nginx user on port 8080
 
+# Update and install nginx
 apt-get update -y
 apt-get install -y nginx
 
+# Ensure the nginx user exists
 id -u nginx > /dev/null 2>&1 || useradd -r nginx
 
-sed -i 's/^user www-data;/user nginx;/' /etc/nginx/nginx.conf
-sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
-sed -i 's/listen \[::\]:80 default_server ipv6only=on;/listen [::]:8080 default_server ipv6only=on;/' /etc/nginx/sites-available/default
+# 1. Comment out the 'user' directive to stop the warning when running as non-root
+sed -i 's/^user /#user /' /etc/nginx/nginx.conf
 
-mkdir -p /var/lib/nginx/body
-chown -R nginx:nginx /var/log/nginx
+# 2. Delete duplicate worker_rlimit_nofile lines causing crashes
+sed -i '/worker_rlimit_nofile/d' /etc/nginx/nginx.conf
+
+# 3. Move PID file location to a path the nginx user can write to
+sed -i 's|pid /run/nginx.pid;|pid /var/run/nginx/nginx.pid;|' /etc/nginx/nginx.conf
+
+# 4. Change default listening ports to 8080
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
+    sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:8080 default_server;/' /etc/nginx/sites-available/default
+fi
+
+# Fix system directory ownerships so the unprivileged user has full access
+mkdir -p /var/lib/nginx /var/log/nginx /var/run/nginx
 chown -R nginx:nginx /var/lib/nginx
+chown -R nginx:nginx /var/log/nginx
+chown -R nginx:nginx /var/run/nginx
 
-sed -i 's|pid /run/nginx.pid;|pid /var/lib/nginx/nginx.pid;|' /etc/nginx/nginx.conf
-
+# Stop any running system service instances cleanly
 service nginx stop > /dev/null 2>&1
 pkill nginx > /dev/null 2>&1
 sleep 1
 
+# Start Nginx cleanly directly as the nginx user
 su -s /bin/bash nginx -c "/usr/sbin/nginx"
 
-sleep 1
-# shellcheck disable=SC2009
-ps auxff | grep nginx
